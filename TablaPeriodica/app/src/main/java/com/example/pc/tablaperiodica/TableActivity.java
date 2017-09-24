@@ -24,7 +24,7 @@ import com.example.pc.tablaperiodica.data.TableElements;
 
 import org.w3c.dom.Text;
 
-public class Table extends AppCompatActivity {
+public class TableActivity extends AppCompatActivity {
 
     Context mContext;
 
