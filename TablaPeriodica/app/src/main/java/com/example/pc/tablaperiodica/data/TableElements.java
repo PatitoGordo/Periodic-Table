@@ -79,8 +79,8 @@ public class TableElements {
         return view;
     }
 
-    public static View elementView(Context context, int number){
-        if(number<=0 || number>118)
+    public static View getElementView(Context context, int index){
+        if(index<=0 || index>118)
             return noElement(context);
 
         View view;
@@ -88,12 +88,18 @@ public class TableElements {
 //        view = inflater.inflate(R.layout.element_view, null);
         view = View.inflate(context, R.layout.element_view, null);
 
+        SetElemenNumberAndSymbol(index, view);
+        return view;
+    }
+
+    public static void SetElemenNumberAndSymbol(int elementIndex, View view) {
+        if(elementIndex<=0 || elementIndex>118)
+            return;
         TextView elementNumber = (TextView) view.findViewById(R.id.tv_atomic_number);
         TextView elementSymbol = (TextView) view.findViewById(R.id.tv_element_symbol);
 
-        elementNumber.setText(String.valueOf(number));
-        elementSymbol.setText(elementSymbols[number]);
-        return view;
+        elementNumber.setText(String.valueOf(elementIndex));
+        elementSymbol.setText(elementSymbols[elementIndex]);
     }
 
 }

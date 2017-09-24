@@ -33,7 +33,7 @@ public class Table extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table);
 
-        mContext = Table.this;
+        mContext = this;
 
         GridView table = (GridView) findViewById(R.id.tableGridView);
         table.setAdapter(new ElementsAdapter(this));

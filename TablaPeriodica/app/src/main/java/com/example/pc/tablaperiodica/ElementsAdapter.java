@@ -41,15 +41,10 @@ public class ElementsAdapter extends BaseAdapter{
         int elementIndex = tableIndex[position];
         View elementView;
         if(convertView == null){
-            elementView = TableElements.elementView(mContext, elementIndex);
+            elementView = TableElements.getElementView(mContext, elementIndex);
         } else {
             elementView = convertView;
-            TextView number = (TextView) elementView.findViewById(R.id.tv_atomic_number);
-            TextView symbol = (TextView) elementView.findViewById(R.id.tv_element_symbol);
-
-            number.setText(String.valueOf(elementIndex));
-            symbol.setText(TableElements.getElementSymbol(elementIndex));
-
+            TableElements.SetElemenNumberAndSymbol(elementIndex, elementView);
         }
         return elementView;
     }
