@@ -88,11 +88,11 @@ public class TableElements {
 //        view = inflater.inflate(R.layout.element_view, null);
         view = View.inflate(context, R.layout.element_view, null);
 
-        SetElemenNumberAndSymbol(index, view);
+        SetElementNumberAndSymbol(index, view);
         return view;
     }
 
-    public static void SetElemenNumberAndSymbol(int elementIndex, View view) {
+    public static void SetElementNumberAndSymbol(int elementIndex, View view) {
         if(elementIndex<=0 || elementIndex>118)
             return;
         TextView elementNumber = (TextView) view.findViewById(R.id.tv_atomic_number);

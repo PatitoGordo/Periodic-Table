@@ -62,7 +62,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.Ques
     @Override
     public void onBindViewHolder(QuestionsAdapterViewHolder questionsAdapterViewHolder , int position) {
 
-        String question = QuestionsData.questionList[position];
+        String question = QuestionsData.getQuestion(position);
         questionsAdapterViewHolder.mQuestionTextView.setText(question);
         questionsAdapterViewHolder.mQuestionNumber.setText(getCharForNumber(position)+".");
 

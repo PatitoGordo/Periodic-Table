@@ -26,12 +26,18 @@ import org.w3c.dom.Text;
 
 public class TableActivity extends AppCompatActivity {
 
+    public static final String QUESTION_NUMBER_KEY = "questionNumber";
+
     Context mContext;
+
+    private int questionNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table);
+
+        questionNumber = getIntent().getExtras().getInt(QUESTION_NUMBER_KEY, -1);
 
         mContext = this;
 

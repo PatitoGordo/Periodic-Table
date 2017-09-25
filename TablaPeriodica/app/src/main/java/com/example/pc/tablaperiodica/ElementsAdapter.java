@@ -44,7 +44,7 @@ public class ElementsAdapter extends BaseAdapter{
             elementView = TableElements.getElementView(mContext, elementIndex);
         } else {
             elementView = convertView;
-            TableElements.SetElemenNumberAndSymbol(elementIndex, elementView);
+            TableElements.SetElementNumberAndSymbol(elementIndex, elementView);
         }
         return elementView;
     }

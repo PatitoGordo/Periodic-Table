@@ -8,7 +8,7 @@ import android.text.Html;
 
 public class QuestionsData {
 
-    public static final String[] questionList = {
+    private static final String[] questionList = {
             "Elementos metálicos en el grupo 14",
             "Radio atómico más grande en el grupo 17 A",
             "Elemento de mayor electronegatividad",
@@ -27,5 +27,11 @@ public class QuestionsData {
     };
 
     public static final int QUESTION_COUNT = questionList.length;
+
+    public static String getQuestion(int questionIndex){
+        if(questionIndex<0 || questionIndex >= QUESTION_COUNT)
+            return null;
+        return questionList[questionIndex];
+    }
 
 }

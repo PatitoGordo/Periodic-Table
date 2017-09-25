@@ -1,6 +1,7 @@
 package com.example.pc.tablaperiodica;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,6 +31,11 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
     @Override
     public void onClick(int questionNumber) {
         Context context = QuestionsActivity.this;
-        Toast.makeText(context, "You pressed question "+questionNumber, Toast.LENGTH_SHORT).show();
+        Class targetClass = TableActivity.class;
+        Intent intent = new Intent(context, targetClass);
+
+        intent.putExtra(TableActivity.QUESTION_NUMBER_KEY, questionNumber);
+
+        startActivity(intent);
     }
 }
