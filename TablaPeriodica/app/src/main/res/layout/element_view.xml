@@ -20,12 +20,13 @@
 
     <TextView
         android:id="@+id/tv_element_symbol"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="2dp"
         android:elevation="16sp"
         android:gravity="center_horizontal"
         android:maxLines="1"
+        android:singleLine="false"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:textColor="@drawable/text_selector"
         android:textSize="20sp"
@@ -37,6 +38,8 @@
     <View
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:background="@drawable/element_selector" />
+        android:background="@drawable/element_selector"
+        tools:layout_editor_absoluteY="0dp"
+        tools:layout_editor_absoluteX="0dp" />
 
 </android.support.constraint.ConstraintLayout>

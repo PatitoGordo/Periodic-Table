@@ -87,19 +87,19 @@ public class TableElements {
 //        LayoutInflater inflater = (LayoutInflater)   context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 //        view = inflater.inflate(R.layout.element_view, null);
         view = View.inflate(context, R.layout.element_view, null);
-
-        SetElementNumberAndSymbol(index, view);
         return view;
     }
 
     public static void SetElementNumberAndSymbol(int elementIndex, View view) {
-        if(elementIndex<=0 || elementIndex>118)
+        if(elementIndex<=0 || elementIndex>118) {
+            view.setVisibility(View.INVISIBLE);
             return;
+        }
         TextView elementNumber = (TextView) view.findViewById(R.id.tv_atomic_number);
         TextView elementSymbol = (TextView) view.findViewById(R.id.tv_element_symbol);
 
         elementNumber.setText(String.valueOf(elementIndex));
         elementSymbol.setText(elementSymbols[elementIndex]);
+        view.setVisibility(View.VISIBLE);
     }
-
 }
