@@ -1,45 +1,27 @@
 package com.example.pc.tablaperiodica;
 
 import android.content.Context;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Layout;
-import android.util.DisplayMetrics;
-import android.util.StringBuilderPrinter;
-import android.view.Display;
-import android.view.GestureDetector;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.view.ViewGroup.LayoutParams;
 
-import com.example.pc.tablaperiodica.data.TableElements;
-
-import org.w3c.dom.Text;
+import com.example.pc.tablaperiodica.data.QuestionsData;
 
 public class TableActivity extends AppCompatActivity {
 
-    public static final String QUESTION_NUMBER_KEY = "questionNumber";
+    public static final String QUESTION_NUMBER_KEY = "mQuestionNumber";
 
     Context mContext;
 
-    private int questionNumber;
+    private int mQuestionNumber;
 
     private GridView mTableView;
     private ElementsAdapter mAdapter;
 
-    private GestureDetector gestureDetector;
+    private int[] mAnswer;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -53,7 +35,8 @@ public class TableActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table);
 
-        questionNumber = getIntent().getExtras().getInt(QUESTION_NUMBER_KEY, -1);
+        mQuestionNumber = getIntent().getExtras().getInt(QUESTION_NUMBER_KEY, -1);
+        mAnswer = QuestionsData.getAnswer(mQuestionNumber);
 
         mContext = this;
 
@@ -61,21 +44,6 @@ public class TableActivity extends AppCompatActivity {
 
         mAdapter = new ElementsAdapter(this);
         mTableView.setAdapter(mAdapter);
-//        mTableView.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                v.setVisibility(View.INVISIBLE);
-//                return false;
-//            }
-//        });
-
-//        mTableView.setOnItemClickListener(new AdapterView.OnTouchListener() {
-//            public void onItemClick(AdapterView<?> parent, View v,
-//                                    int position, long id) {
-//                int clickedElementNumber = mAdapter.getElementIndexFromPosition(position);
-//                mAdapter.clickedElement(position);
-//            }
-//        });
 
     }
 
@@ -85,7 +53,7 @@ public class TableActivity extends AppCompatActivity {
         switch (item.getItemId()){
 
             case R.id.send_answers:
-                //TODO Enviar respuestas
+                mAdapter.showAnswers(mAnswer, mTableView);
                 return true;
             case R.id.clear_answers:
                 mAdapter.clearSelection(mTableView);

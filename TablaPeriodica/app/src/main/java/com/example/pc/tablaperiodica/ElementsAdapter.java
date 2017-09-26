@@ -18,6 +18,8 @@ import android.widget.Toast;
 
 import com.example.pc.tablaperiodica.data.TableElements;
 
+import static com.example.pc.tablaperiodica.data.TableElements.tableIndex;
+
 /**
  * Created by pc on 23/09/2017.
  */
@@ -76,9 +78,13 @@ public class ElementsAdapter extends BaseAdapter{
 
     public void clearSelection(GridView grid){
 
+        int brightColor = mContext.getResources().getColor(R.color.elementColor);
+        int darkColor = mContext.getResources().getColor(R.color.elementColorDark);
+
         for (int i=0; i<getCount(); i++){
             if(getElementIndexFromPosition(i) > 0) {
                 View element = grid.getChildAt(i);
+                element.findViewById(R.id.element_status_icon).setVisibility(View.GONE);
                 final TextView numberTextView = (TextView) element.findViewById(R.id.tv_atomic_number);
                 int elementIndex = Integer.parseInt(numberTextView.getText().toString());
 
@@ -88,7 +94,7 @@ public class ElementsAdapter extends BaseAdapter{
 
                     int animDuration = 70;
                     float scale = 1.2f;
-                    animateElement(element, animDuration, scale, false);
+                    animateElement(element, brightColor, darkColor);
                 }
             }
 
@@ -97,6 +103,14 @@ public class ElementsAdapter extends BaseAdapter{
 
     public int getElementIndexFromPosition(int position){
         return tableIndex[position];
+    }
+
+    public int getElementPositionFromIndex(int index){
+        for(int i=0; i<tableIndex.length; i++){
+            if(tableIndex[i] == index)
+                return i;
+        }
+        return -1;
     }
 
     public static boolean elementIsSelected(int elementIndex){
@@ -110,23 +124,29 @@ public class ElementsAdapter extends BaseAdapter{
 
         selectedElements[elementIndex] = !selectedElements[elementIndex];
 
-        int animDuration = 70;
-        float scale = 1.2f;
+        int brightColor = mContext.getResources().getColor(R.color.elementColor);
+        int darkColor = mContext.getResources().getColor(R.color.elementColorDark);
 
-        animateElement(v, animDuration, scale, elementIsSelected(elementIndex));
+        if(elementIsSelected(elementIndex)){
+            animateElement(v, darkColor, brightColor);
+        }
+        else{
+            animateElement(v, brightColor, darkColor);
+        }
+
     }
 
 
 
-    public void animateElement(final View v, final int animDuration, final float scale, final boolean select){
+    public void animateElement(final View v, final int backgroundColor, final int textColor){
         final View backgroundView = v.findViewById(R.id.background_view);
         final TextView numberTextView = (TextView) v.findViewById(R.id.tv_atomic_number);
         final TextView symbolTextview = (TextView) v.findViewById(R.id.tv_element_symbol);
 
-        final int brightColor = mContext.getResources().getColor(R.color.elementColor);
-        final int darkColor = mContext.getResources().getColor(R.color.elementColorDark);
 
-        v.animate().setDuration(animDuration).scaleY(scale)
+        final int animDuration = 100;
+
+        v.animate().setDuration(animDuration).scaleX(0f)
                 .setListener(new Animator.AnimatorListener() {
                     @Override
                     public void onAnimationStart(Animator animation) {
@@ -136,18 +156,14 @@ public class ElementsAdapter extends BaseAdapter{
                     @Override
                     public void onAnimationEnd(Animator animation) {
 
-                        if(select){
-                            symbolTextview.setTextColor(brightColor);
-                            numberTextView.setTextColor(brightColor);
-                            backgroundView.setBackgroundColor(darkColor);
+                        if(textColor != 0) {
+                            symbolTextview.setTextColor(textColor);
+                            numberTextView.setTextColor(textColor);
                         }
-                        else{
-                            symbolTextview.setTextColor(darkColor);
-                            numberTextView.setTextColor(darkColor);
-                            backgroundView.setBackgroundColor(brightColor);
+                        if(backgroundColor != 0) {
+                            backgroundView.setBackgroundColor(backgroundColor);
                         }
-
-                        v.animate().setDuration(animDuration).scaleY(1f).start();
+                        v.animate().setDuration(animDuration).scaleX(1f).start();
                     }
 
                     @Override
@@ -162,6 +178,13 @@ public class ElementsAdapter extends BaseAdapter{
                 });
     }
 
+    public void changeElementColor(View elementView, int backgroundColor, int textColor){
+
+        animateElement(elementView, backgroundColor, textColor);
+
+
+    }
+
     public void clickedElement(int position){ //Se manda a llamar cuando se clickea un elemento en position x
 
         int elementIndex = getElementIndexFromPosition(position);
@@ -171,18 +194,15 @@ public class ElementsAdapter extends BaseAdapter{
         notifyDataSetChanged();
     }
 
-    public static final int[] tableIndex = {
-            1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,
-            3,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  5,  6,  7,  8,  9,  10,
-            11, 12, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  13, 14, 15, 16, 17, 18,
-            19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-            37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54,
-            55, 56, 57, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86,
-            87, 88, 89, 104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,
+    public void showAnswers(int[] answers, GridView table){
+        for(int elementIndex : answers){
 
-            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-            0,  0,  0,  0,  58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
-            0,  0,  0,  0,  90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100,101,102,103
+            int greenColor = mContext.getResources().getColor(R.color.green);
+            int blackColor = mContext.getResources().getColor(R.color.black);
 
-    };
+            changeElementColor(
+                    table.getChildAt(getElementPositionFromIndex(elementIndex))
+                    ,greenColor, blackColor);
+        }
+    }
 }

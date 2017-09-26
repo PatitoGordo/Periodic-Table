@@ -26,6 +26,33 @@ public class QuestionsData {
             "La menor Energía de Ionización en el grupo 2"
     };
 
+    private static final String[] answerList = {
+            "50,82,114",
+            "87",
+            "9",
+            "35",
+            "52",
+            "47",
+            "7,15",
+            "79",
+            "5",
+            "30,48,80,112",
+            "86",
+            "27",
+            "87",
+            "36",
+            "88"
+    };
+
+    public static int[] getAnswer(int index){
+        String[] temp_answer = answerList[index].split(",");
+        int[] answer = new int[temp_answer.length];
+        for(int i=0; i<temp_answer.length; i++){
+            answer[i] = Integer.parseInt(temp_answer[i]);
+        }
+        return answer;
+    }
+
     public static final int QUESTION_COUNT = questionList.length;
 
     public static String getQuestion(int questionIndex){
