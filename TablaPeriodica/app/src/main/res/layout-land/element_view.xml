@@ -10,7 +10,7 @@
 
     <TextView
         android:id="@+id/tv_atomic_number"
-        android:textColor="@drawable/text_selector"
+        android:textColor="@color/elementColorDark"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
@@ -30,7 +30,7 @@
         android:maxLines="1"
         android:singleLine="false"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        android:textColor="@drawable/text_selector"
+        android:textColor="@color/elementColorDark"
         android:textSize="21sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -40,7 +40,8 @@
     <View
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:background="@drawable/element_selector"
+        android:id="@+id/background_view"
+        android:background="@color/elementColor"
         tools:layout_editor_absoluteY="0dp"
         tools:layout_editor_absoluteX="0dp" />
 

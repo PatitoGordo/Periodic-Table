@@ -8,7 +8,11 @@ import android.text.Layout;
 import android.util.DisplayMetrics;
 import android.util.StringBuilderPrinter;
 import android.view.Display;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -32,6 +36,18 @@ public class TableActivity extends AppCompatActivity {
 
     private int questionNumber;
 
+    private GridView mTableView;
+    private ElementsAdapter mAdapter;
+
+    private GestureDetector gestureDetector;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.table_menu, menu);
+        return true;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,16 +57,43 @@ public class TableActivity extends AppCompatActivity {
 
         mContext = this;
 
-        GridView table = (GridView) findViewById(R.id.tableGridView);
-        table.setAdapter(new ElementsAdapter(this));
+        mTableView = (GridView) findViewById(R.id.tableGridView);
 
-        table.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v,
-                                    int position, long id) {
-                int clickedElementNumber = ElementsAdapter.clickedElement(position);
-                Toast.makeText(mContext, "You clicked on " + TableElements.getElementName(clickedElementNumber), Toast.LENGTH_SHORT).show();
-            }
-        });
+        mAdapter = new ElementsAdapter(this);
+        mTableView.setAdapter(mAdapter);
+//        mTableView.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                v.setVisibility(View.INVISIBLE);
+//                return false;
+//            }
+//        });
+
+//        mTableView.setOnItemClickListener(new AdapterView.OnTouchListener() {
+//            public void onItemClick(AdapterView<?> parent, View v,
+//                                    int position, long id) {
+//                int clickedElementNumber = mAdapter.getElementIndexFromPosition(position);
+//                mAdapter.clickedElement(position);
+//            }
+//        });
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()){
+
+            case R.id.send_answers:
+                //TODO Enviar respuestas
+                return true;
+            case R.id.clear_answers:
+                mAdapter.clearSelection(mTableView);
+                return true;
+            default:
+
+                return super.onOptionsItemSelected(item);
+        }
 
 
     }
