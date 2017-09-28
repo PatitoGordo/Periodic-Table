@@ -3,4 +3,5 @@
 
     <string name="clear_answers">Deseleccionar respuestas</string>
     <string name="send_answers">Enviar respuestas</string>
+    <string name="reset_answers">Resetear preguntas</string>
 </resources>

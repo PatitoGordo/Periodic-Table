@@ -1,18 +1,25 @@
 package com.example.pc.tablaperiodica;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.GridView;
+import android.widget.ProgressBar;
 
+import com.example.pc.tablaperiodica.data.QuestionsContract;
 import com.example.pc.tablaperiodica.data.QuestionsData;
 
 public class TableActivity extends AppCompatActivity {
 
     public static final String QUESTION_NUMBER_KEY = "mQuestionNumber";
+    public static final String USER_ANSWERS_KEY = "mUserAnswers";
 
     Context mContext;
 
@@ -21,7 +28,10 @@ public class TableActivity extends AppCompatActivity {
     private GridView mTableView;
     private ElementsAdapter mAdapter;
 
-    private int[] mAnswer;
+    private int[] mCorrectAnswer;
+    private int[] mUserAnswers;
+
+    private QuestionsDBHelper mDbHelper;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -36,14 +46,20 @@ public class TableActivity extends AppCompatActivity {
         setContentView(R.layout.activity_table);
 
         mQuestionNumber = getIntent().getExtras().getInt(QUESTION_NUMBER_KEY, -1);
-        mAnswer = QuestionsData.getAnswer(mQuestionNumber);
+        mUserAnswers = getIntent().getExtras().getIntArray(USER_ANSWERS_KEY);
+
+
+        mCorrectAnswer = QuestionsData.getAnswer(mQuestionNumber);
 
         mContext = this;
 
         mTableView = (GridView) findViewById(R.id.tableGridView);
 
-        mAdapter = new ElementsAdapter(this);
+        mAdapter = new ElementsAdapter(mContext, mUserAnswers, mCorrectAnswer, mTableView);
+
         mTableView.setAdapter(mAdapter);
+
+        mDbHelper = new QuestionsDBHelper(mContext);
 
     }
 
@@ -52,17 +68,68 @@ public class TableActivity extends AppCompatActivity {
 
         switch (item.getItemId()){
 
-            case R.id.send_answers:
-                mAdapter.showAnswers(mAnswer, mTableView);
-                return true;
-            case R.id.clear_answers:
-                mAdapter.clearSelection(mTableView);
+            case android.R.id.home:
+                new writeAnswersTask(mAdapter.getSelectedAnswersAsString()).execute((Void) null);
+                finish();
                 return true;
             default:
 
                 return super.onOptionsItemSelected(item);
         }
 
+    }
 
+    @Override
+    protected void onDestroy() {
+        new writeAnswersTask(mAdapter.getSelectedAnswersAsString()).execute((Void) null);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        new writeAnswersTask(mAdapter.getSelectedAnswersAsString()).execute((Void) null);
+    }
+
+    private class writeAnswersTask extends AsyncTask<Void, Void, Void>{
+
+        private String answersToWrite;
+
+        writeAnswersTask(String answers){
+            answersToWrite = answers;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+            ContentValues values = new ContentValues();
+
+            values.put(QuestionsContract.AnswersEntry.COLUMN_USER_ANSWERS, answersToWrite);
+
+            int status = QuestionsActivity.PENDING_QUESTION;
+            if(mAdapter.correctlyAnswered()){
+                status = QuestionsActivity.CORRECT_QUESTION;
+            } else if(mAdapter.selectedAnswers() > 0){
+                status = QuestionsActivity.WRONG_QUESTION;
+            }
+
+            values.put(QuestionsContract.AnswersEntry.COLUMN_ANSWERED, status);
+
+            String selection = QuestionsContract.AnswersEntry._ID + " = ?";
+            String[] selectionArgs = {String.valueOf(mQuestionNumber)};
+
+            db.update(
+                    QuestionsContract.AnswersEntry.QUESTION_TABLE_NAME,
+                    values,
+                    selection,
+                    selectionArgs
+                    );
+            db.close();
+
+
+
+            return null;
+        }
     }
 }
