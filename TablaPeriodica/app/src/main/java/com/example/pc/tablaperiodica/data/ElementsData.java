@@ -11,7 +11,7 @@ import com.example.pc.tablaperiodica.R;
  * Created by pc on 22/09/2017.
  */
 
-public class TableElements {
+public class ElementsData {
 
 
     private static final String[] elementNames = {
@@ -39,7 +39,7 @@ public class TableElements {
 
     };
 
-    private static final String[] elementSymbols = {
+    public static final String[] elementSymbols = {
 
             "", "H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg", "Al",
             "Si", "P", "S", "Cl", "Ar", "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn",
@@ -73,7 +73,7 @@ public class TableElements {
 
 
     public static String getElementSymbol(int index){
-        if(index<0 || index>=118)
+        if(index<0 || index>118)
             return null;
         return elementSymbols[index];
     }

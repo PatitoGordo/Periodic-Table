@@ -33,62 +33,57 @@ public class TableActivity extends AppCompatActivity {
 
     private QuestionsDBHelper mDbHelper;
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        getMenuInflater().inflate(R.menu.table_menu, menu);
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//
+//        getMenuInflater().inflate(R.menu.table_menu, menu);
+//        return true;
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table);
 
-        mQuestionNumber = getIntent().getExtras().getInt(QUESTION_NUMBER_KEY, -1);
-        mUserAnswers = getIntent().getExtras().getIntArray(USER_ANSWERS_KEY);
+//        mQuestionNumber = getIntent().getExtras().getInt(QUESTION_NUMBER_KEY, -1);
+//        mUserAnswers = getIntent().getExtras().getIntArray(USER_ANSWERS_KEY);
+        mQuestionNumber = 1;
+        mUserAnswers = new int[0];
 
-
-        mCorrectAnswer = QuestionsData.getAnswer(mQuestionNumber);
+//        mCorrectAnswer = QuestionsData.getAnswer(mQuestionNumber);
 
         mContext = this;
 
         mTableView = (GridView) findViewById(R.id.tableGridView);
 
-        mAdapter = new ElementsAdapter(mContext, mUserAnswers, mCorrectAnswer, mTableView);
+        mAdapter = new ElementsAdapter(mContext);
 
-        mTableView.setAdapter(mAdapter);
+//        mTableView.setAdapter(mAdapter);
 
         mDbHelper = new QuestionsDBHelper(mContext);
 
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()){
-
-            case android.R.id.home:
-                new writeAnswersTask(mAdapter.getSelectedAnswersAsString()).execute((Void) null);
-                finish();
-                return true;
-            default:
-
-                return super.onOptionsItemSelected(item);
-        }
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        new writeAnswersTask(mAdapter.getSelectedAnswersAsString()).execute((Void) null);
-        super.onDestroy();
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//
+//        switch (item.getItemId()){
+//
+//            case android.R.id.home:
+//                new writeAnswersTask(mAdapter.getSelectedAnswersAsString()).execute((Void) null);
+//                finish();
+//                return true;
+//            default:
+//
+//                return super.onOptionsItemSelected(item);
+//        }
+//
+//    }
 
     @Override
     protected void onStop() {
         super.onStop();
-        new writeAnswersTask(mAdapter.getSelectedAnswersAsString()).execute((Void) null);
+//        new writeAnswersTask(mAdapter.getSelectedAnswersAsString()).execute((Void) null);
     }
 
     private class writeAnswersTask extends AsyncTask<Void, Void, Void>{
@@ -108,11 +103,11 @@ public class TableActivity extends AppCompatActivity {
             values.put(QuestionsContract.AnswersEntry.COLUMN_USER_ANSWERS, answersToWrite);
 
             int status = QuestionsActivity.PENDING_QUESTION;
-            if(mAdapter.correctlyAnswered()){
-                status = QuestionsActivity.CORRECT_QUESTION;
-            } else if(mAdapter.selectedAnswers() > 0){
-                status = QuestionsActivity.WRONG_QUESTION;
-            }
+//            if(mAdapter.correctlyAnswered()){
+//                status = QuestionsActivity.CORRECT_QUESTION;
+//            } else if(mAdapter.selectedAnswers() > 0){
+//                status = QuestionsActivity.WRONG_QUESTION;
+//            }
 
             values.put(QuestionsContract.AnswersEntry.COLUMN_ANSWERED, status);
 

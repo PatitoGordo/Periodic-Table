@@ -1,6 +1,7 @@
 package com.example.pc.tablaperiodica.data;
 
 import android.text.Html;
+import android.util.Log;
 
 /**
  * Created by pc on 24/09/2017.

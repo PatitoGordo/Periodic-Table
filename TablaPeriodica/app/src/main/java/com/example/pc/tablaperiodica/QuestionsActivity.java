@@ -2,11 +2,9 @@ package com.example.pc.tablaperiodica;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.support.annotation.RequiresPermission;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,11 +12,13 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.GridView;
 
 import com.example.pc.tablaperiodica.data.QuestionsContract;
 import com.example.pc.tablaperiodica.data.QuestionsContract.AnswersEntry;
 import com.example.pc.tablaperiodica.data.QuestionsData;
-import com.example.pc.tablaperiodica.data.TableElements;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,17 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
     private Context mContext;
     private QuestionsDBHelper mDbHelper;
 
+
+
+    private GridView mTableView;
+    private ElementsAdapter mElementsAdapter;
+
     private List<Question> mQuestionsList;
+
+    private int mQuestionNumber;
+
+    private int[] mCorrectAnswer;
+    private int[] mUserAnswers;
 
     public static final int PENDING_QUESTION = 0;
     public static final int WRONG_QUESTION = -1;
@@ -45,6 +55,9 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
 
         mContext = QuestionsActivity.this;
 
+        Button b = (Button) findViewById(R.id.button);
+
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
 
@@ -54,6 +67,34 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
         mQuestionsList = new ArrayList<>();
 
         mDbHelper = new QuestionsDBHelper(mContext);
+
+        mQuestionNumber = 1;
+        mUserAnswers = new int[0];
+
+        mContext = this;
+
+        new ReadDatabase().execute((Void) null);
+
+        mTableView = (GridView) findViewById(R.id.tableGridView);
+
+        mElementsAdapter = new ElementsAdapter(mContext);
+
+        mTableView.setAdapter(mElementsAdapter);
+
+        mDbHelper = new QuestionsDBHelper(mContext);
+
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                new writeAnswersTask(mElementsAdapter.getSelectedAnswersAsString()).execute((Void) null);
+
+                mQuestionsList.get(mQuestionNumber).userAnswers = mElementsAdapter.getSelectedAnswersAsArray();
+
+                Log.d("prueba", "guardando " + mElementsAdapter.getSelectedAnswersAsString());
+                mRecyclerView.setVisibility(View.VISIBLE);
+                mTableView.setVisibility(View.GONE);
+            }
+        });
     }
 
     @Override
@@ -70,7 +111,6 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
         switch ( item.getItemId() ){
             case R.id.reset_answers:
                 new resetAnswers().execute((Void) null);
-                mQuestionsAdapter.notifyDataSetChanged();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -138,16 +178,9 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            mQuestionsAdapter.notifyDataSetChanged();
+            mQuestionsAdapter.updateData(mQuestionsList);
             super.onPostExecute(aVoid);
         }
-    }
-
-    @Override
-    protected void onResume() {
-        new ReadDatabase().execute((Void) null);
-        mQuestionsAdapter.notifyDataSetChanged();
-        super.onResume();
     }
 
     @Override
@@ -155,16 +188,31 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
 
 //        mQuestionsAdapter.notifyDataSetChanged();
 
-        Context context = QuestionsActivity.this;
-        Class targetClass = TableActivity.class;
-        Intent intent = new Intent(context, targetClass);
+//        Context context = QuestionsActivity.this;
+//        Class targetClass = TableActivity.class;
+//        Intent intent = new Intent(context, targetClass);
+//
+////        intent.putExtra(TableActivity.QUESTION_NUMBER_KEY, questionNumber);
+////        int[] answers = mQuestionsList.get(questionNumber).userAnswers;
+////        intent.putExtra(TableActivity.USER_ANSWERS_KEY, answers);
+//
+//
+//        startActivity(intent);
 
-        intent.putExtra(TableActivity.QUESTION_NUMBER_KEY, questionNumber);
-        int[] answers = mQuestionsList.get(questionNumber).userAnswers;
-        intent.putExtra(TableActivity.USER_ANSWERS_KEY, answers);
+        mQuestionNumber = questionNumber;
+        mUserAnswers = mQuestionsList.get(questionNumber).userAnswers;
+        mCorrectAnswer = QuestionsData.getAnswer(questionNumber);
 
+        String caca = "";
+        for(int valor : mUserAnswers){
+            caca = caca + valor + "-";
+        }
+        Log.d("prueba", "seleccionadas " + caca);
 
-        startActivity(intent);
+        mElementsAdapter.setNewData(mUserAnswers, mCorrectAnswer, mTableView);
+
+        mRecyclerView.setVisibility(View.GONE);
+        mTableView.setVisibility(View.VISIBLE);
 
     }
 
@@ -249,7 +297,55 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+            mQuestionsAdapter.updateData(mQuestionsList);
+        }
+    }
+
+    private class writeAnswersTask extends AsyncTask<Void, Void, Void>{
+
+        private String answersToWrite;
+
+        writeAnswersTask(String answers){
+            answersToWrite = answers;
+            Log.d("prueba", answersToWrite);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+            ContentValues values = new ContentValues();
+
+            values.put(QuestionsContract.AnswersEntry.COLUMN_USER_ANSWERS, answersToWrite);
+
+            int status = QuestionsActivity.PENDING_QUESTION;
+//            if(mElementsAdapter.correctlyAnswered()){
+//                status = QuestionsActivity.CORRECT_QUESTION;
+//            } else if(mElementsAdapter.selectedAnswers() > 0){
+//                status = QuestionsActivity.WRONG_QUESTION;
+//            }
+
+            values.put(QuestionsContract.AnswersEntry.COLUMN_ANSWERED, status);
+
+            String selection = QuestionsContract.AnswersEntry._ID + " = ?";
+            String[] selectionArgs = {String.valueOf(mQuestionNumber)};
+
+            db.update(
+                    QuestionsContract.AnswersEntry.QUESTION_TABLE_NAME,
+                    values,
+                    selection,
+                    selectionArgs
+            );
+            db.close();
+
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            new ReadDatabase().execute((Void) null);
         }
     }
 
@@ -257,12 +353,6 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
         int id;
         int status;
         int[] userAnswers;
-
-        public Question(int id, int status, int[] userAnswers){
-            this.id = id;
-            this.status = status;
-            this.userAnswers = userAnswers;
-        }
 
         public Question(int id, int status, String userAnswers){
             this.id = id;

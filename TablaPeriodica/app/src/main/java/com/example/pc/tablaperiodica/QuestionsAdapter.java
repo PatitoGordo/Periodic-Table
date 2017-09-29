@@ -72,6 +72,11 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.Ques
         return new QuestionsAdapterViewHolder(view);
     }
 
+    public void updateData(List<Question> newQuestions){
+        questionList = newQuestions;
+        notifyDataSetChanged();
+    }
+
     @Override
     public void onBindViewHolder(QuestionsAdapterViewHolder questionsAdapterViewHolder , int position) {
 
@@ -81,28 +86,28 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.Ques
 
         if(questionList != null) {
 
-                switch (questionList.get(position).status) {
-                    case QuestionsActivity.WRONG_QUESTION:
-                        questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_cancel_black_24dp);
-                        break;
-                    case QuestionsActivity.PENDING_QUESTION:
-                        questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_watch_later_black_24dp);
-                        ScaleAnimation anim = new ScaleAnimation(
-                                1f, 0.6f, // Start and end values for the X axis scaling
-                                1f, 0.6f, // Start and end values for the Y axis scaling
-                                Animation.RELATIVE_TO_SELF, 0.5f, // Pivot point of X scaling
-                                Animation.RELATIVE_TO_SELF, 0.5f);
-                        anim.setDuration(500);
-                        anim.setRepeatCount(Animation.INFINITE);
-                        anim.setRepeatMode(Animation.REVERSE);
-                        questionsAdapterViewHolder.mStatusIcon.startAnimation(anim);
-                        break;
-                    case QuestionsActivity.CORRECT_QUESTION:
-                        questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_check_circle_black_24dp);
-                        break;
-                    default:
-                        break;
-                }
+//                switch (questionList.get(position).status) {
+//                    case QuestionsActivity.WRONG_QUESTION:
+//                        questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_cancel_black_24dp);
+//                        break;
+//                    case QuestionsActivity.PENDING_QUESTION:
+//                        questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_watch_later_black_24dp);
+//                        ScaleAnimation anim = new ScaleAnimation(
+//                                1f, 0.6f, // Start and end values for the X axis scaling
+//                                1f, 0.6f, // Start and end values for the Y axis scaling
+//                                Animation.RELATIVE_TO_SELF, 0.5f, // Pivot point of X scaling
+//                                Animation.RELATIVE_TO_SELF, 0.5f);
+//                        anim.setDuration(500);
+//                        anim.setRepeatCount(Animation.INFINITE);
+//                        anim.setRepeatMode(Animation.REVERSE);
+////                        questionsAdapterViewHolder.mStatusIcon.startAnimation(anim);
+//                        break;
+//                    case QuestionsActivity.CORRECT_QUESTION:
+//                        questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_check_circle_black_24dp);
+//                        break;
+//                    default:
+//                        break;
+//                }
 
         }
 

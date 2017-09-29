@@ -2,21 +2,16 @@ package com.example.pc.tablaperiodica;
 
 import android.animation.Animator;
 import android.content.Context;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.pc.tablaperiodica.data.TableElements;
+import com.example.pc.tablaperiodica.data.ElementsData;
 
-import java.util.Arrays;
-
-import static com.example.pc.tablaperiodica.data.TableElements.ELEMENT_COUNT;
-import static com.example.pc.tablaperiodica.data.TableElements.tableIndex;
+import static com.example.pc.tablaperiodica.data.ElementsData.tableIndex;
 
 /**
  * Created by pc on 23/09/2017.
@@ -35,23 +30,31 @@ public class ElementsAdapter extends BaseAdapter{
 
     private static int mCorrectAnswerCount;
 
-    public ElementsAdapter(Context context, int[] selectedAnswers, int[] correctAnswers, GridView gridView){
+    public ElementsAdapter(Context context){
         mContext = context;
-        mSelectedAnswers = selectedAnswers;
-        mCorrectAnswers = correctAnswers;
-        mGridView = gridView;
-        mCorrectAnswerCount = 0;
-        mSelectedCount = 0;
-        selectedElements = new boolean[TableElements.ELEMENT_COUNT];
+    }
 
-        for(int selectedElementIndex : mSelectedAnswers) {
-            selectedElements[selectedElementIndex] = true;
+    public int[] getSelectedAnswersAsArray(){
+        int count = 0;
+        for(int i = 0; i< ElementsData.ELEMENT_COUNT; i++){
+            if(selectedElements[i]){
+                count++;
+            }
         }
+        int[] selectedAnswers = new int[count];
+        count = 0;
+        for(int i = 0; i< ElementsData.ELEMENT_COUNT; i++){
+            if(selectedElements[i]){
+                selectedAnswers[count] = i;
+                count++;
+            }
+        }
+        return selectedAnswers;
     }
 
     public String getSelectedAnswersAsString(){
         String s = "";
-        for(int i=0; i<TableElements.ELEMENT_COUNT; i++){
+        for(int i = 0; i< ElementsData.ELEMENT_COUNT; i++){
             if(selectedElements[i]){
                 s = s.concat(i+",");
             }
@@ -76,68 +79,47 @@ public class ElementsAdapter extends BaseAdapter{
 
     @Override
     public View getView(int position, View elementView, ViewGroup parent) {
+        View newView;
         int elementIndex = tableIndex[position];
         if(elementView == null){
-            elementView = TableElements.getElementView(mContext, elementIndex);
-        }
-
-
-        TableElements.SetElementNumberAndSymbol(elementIndex, elementView);
-
-        if(!elementIsSelected(elementIndex)) {
-
-            elementView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            clickedElement(v);
-                            break;
-                    }
-                    return false;
-                }
-            });
-
+            newView = ElementsData.getElementView(mContext, elementIndex);
         } else {
-
-            int backgroundColor = mContext.getResources().getColor(R.color.red);
-            int textColor = mContext.getResources().getColor(R.color.black);
-
-            if(answerIsCorrect(elementIndex)){
-                backgroundColor = mContext.getResources().getColor(R.color.green);
-            }
-
-            changeElementColor(elementView, backgroundColor ,textColor);
-
+            newView = elementView;
         }
+        ElementsData.SetElementNumberAndSymbol(elementIndex, newView);
 
-        return elementView;
-    }
+        if(selectedElements != null) {
 
-    public void clearSelection(GridView grid){
+            if (!elementIsSelected(elementIndex)) {//TODO arreglar, selectedElements[] es null
 
-        int brightColor = mContext.getResources().getColor(R.color.elementColor);
-        int darkColor = mContext.getResources().getColor(R.color.elementColorDark);
+                newView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
 
-        for (int i=0; i<getCount(); i++){
-            if(getElementIndexFromPosition(i) > 0) {
-                View element = grid.getChildAt(i);
-                element.findViewById(R.id.element_status_icon).setVisibility(View.GONE);
-                final TextView numberTextView = (TextView) element.findViewById(R.id.tv_atomic_number);
-                int elementIndex = Integer.parseInt(numberTextView.getText().toString());
+                        switch (event.getAction()) {
+                            case MotionEvent.ACTION_DOWN:
+                                clickedElement(v);
+                                break;
+                        }
+                        return false;
+                    }
+                });
 
-                if (elementIsSelected(elementIndex)) {
+            } else {
 
-                    selectedElements[elementIndex] = false;
+                int backgroundColor = mContext.getResources().getColor(R.color.red);
+                int textColor = mContext.getResources().getColor(R.color.black);
 
-                    int animDuration = 70;
-                    float scale = 1.2f;
-                    changeElementColor(element, brightColor, darkColor);
+                if (answerIsCorrect(elementIndex)) {
+                    backgroundColor = mContext.getResources().getColor(R.color.green);
                 }
-            }
 
+                changeElementColor(newView, backgroundColor, textColor);
+
+            }
         }
+
+        return newView;
     }
 
     public int getElementIndexFromPosition(int position){
@@ -154,6 +136,25 @@ public class ElementsAdapter extends BaseAdapter{
 
     public static boolean elementIsSelected(int elementIndex){
         return selectedElements[elementIndex];
+    }
+
+    public void setNewData( int[] selectedAnswers, int[] correctAnswers, GridView gridView ){
+        mSelectedAnswers = selectedAnswers;
+        mCorrectAnswers = correctAnswers;
+        mGridView = gridView;
+        mCorrectAnswerCount = 0;
+        mSelectedCount = 0;
+        selectedElements = new boolean[ElementsData.ELEMENT_COUNT];
+
+        for(int selectedElementIndex : mSelectedAnswers) {
+            selectedElements[selectedElementIndex] = true;
+            if(answerIsCorrect(selectedElementIndex)){
+                mCorrectAnswerCount++;
+            }
+        }
+
+        notifyDataSetChanged();
+
     }
 
     public void clickedElement(final View v){
@@ -211,7 +212,7 @@ public class ElementsAdapter extends BaseAdapter{
     }
 
     void playAnimation(){
-        for(int i=0; i<TableElements.tableIndex.length; i++){
+        for(int i=0; i<ElementsData.tableIndex.length; i++){
             final View v = mGridView.getChildAt(i);
             if(getElementIndexFromPosition(i) > 0) {
                 v.animate().setDuration(100).scaleX(0.5f).setListener(new Animator.AnimatorListener() {
@@ -313,17 +314,5 @@ public class ElementsAdapter extends BaseAdapter{
 
                     }
                 });
-    }
-
-    public void showAnswers(int[] answers, GridView table){
-        for(int elementIndex : answers){
-
-            int greenColor = mContext.getResources().getColor(R.color.green);
-            int blackColor = mContext.getResources().getColor(R.color.black);
-
-            changeElementColor(
-                    table.getChildAt(getElementPositionFromIndex(elementIndex))
-                    ,greenColor, blackColor);
-        }
     }
 }
