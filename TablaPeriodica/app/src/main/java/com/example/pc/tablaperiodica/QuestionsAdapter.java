@@ -1,6 +1,8 @@
 package com.example.pc.tablaperiodica;
 
+import android.animation.Animator;
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,14 +28,19 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.Ques
     private final QuestionsAdapterOnClickHandler mClickHandler;
 
     private List<Question> questionList;
+    private int[] statusIconId;
+
+    private Context mContext;
 
 
     public interface QuestionsAdapterOnClickHandler {
         void onClick(int questionNumber);
     }
 
-    public QuestionsAdapter(QuestionsAdapterOnClickHandler clickHandler){
+    public QuestionsAdapter(Context context, QuestionsAdapterOnClickHandler clickHandler){
         mClickHandler = clickHandler;
+        mContext = context;
+        statusIconId = new int[QuestionsData.QUESTION_COUNT];
     }
 
 
@@ -86,28 +93,69 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.Ques
 
         if(questionList != null) {
 
-//                switch (questionList.get(position).status) {
-//                    case QuestionsActivity.WRONG_QUESTION:
-//                        questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_cancel_black_24dp);
-//                        break;
-//                    case QuestionsActivity.PENDING_QUESTION:
-//                        questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_watch_later_black_24dp);
-//                        ScaleAnimation anim = new ScaleAnimation(
-//                                1f, 0.6f, // Start and end values for the X axis scaling
-//                                1f, 0.6f, // Start and end values for the Y axis scaling
-//                                Animation.RELATIVE_TO_SELF, 0.5f, // Pivot point of X scaling
-//                                Animation.RELATIVE_TO_SELF, 0.5f);
-//                        anim.setDuration(500);
-//                        anim.setRepeatCount(Animation.INFINITE);
-//                        anim.setRepeatMode(Animation.REVERSE);
-////                        questionsAdapterViewHolder.mStatusIcon.startAnimation(anim);
-//                        break;
-//                    case QuestionsActivity.CORRECT_QUESTION:
-//                        questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_check_circle_black_24dp);
-//                        break;
-//                    default:
-//                        break;
-//                }
+            int red = mContext.getResources().getColor(R.color.red);
+            int black = mContext.getResources().getColor(R.color.black);
+            int green = mContext.getResources().getColor(R.color.green);
+
+                switch (questionList.get(position).status) {
+                    case QuestionsActivity.WRONG_QUESTION:
+                        if(statusIconId[position] != QuestionsActivity.WRONG_QUESTION){
+                            animateImageAndSetIcon(
+                                    questionsAdapterViewHolder.mStatusIcon,
+                                    R.mipmap.ic_cancel_black_24dp,
+                                    red);
+                        } else {
+                            questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_cancel_black_24dp);
+                            questionsAdapterViewHolder.mStatusIcon.setColorFilter(
+                                    mContext.getResources().getColor(R.color.red));
+                        }
+                        statusIconId[position] = QuestionsActivity.WRONG_QUESTION;
+                        break;
+                    case QuestionsActivity.PENDING_QUESTION:
+                        if(statusIconId[position] != QuestionsActivity.PENDING_QUESTION){
+
+                            if(statusIconId[position] == QuestionsActivity.WRONG_QUESTION){
+                                questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_cancel_black_24dp);
+                                questionsAdapterViewHolder.mStatusIcon.setColorFilter(
+                                        ContextCompat.getColor(mContext, R.color.red));
+                            } else if(statusIconId[position] == QuestionsActivity.CORRECT_QUESTION){
+                                questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_check_circle_black_24dp);
+                                questionsAdapterViewHolder.mStatusIcon.setColorFilter(
+                                        ContextCompat.getColor(mContext, R.color.green));
+                            }
+
+                            animateImageAndSetIcon(
+                                    questionsAdapterViewHolder.mStatusIcon,
+                                    R.mipmap.ic_watch_later_black_24dp,
+                                    black);
+                        } else {
+                            questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_watch_later_black_24dp);
+                            questionsAdapterViewHolder.mStatusIcon.setColorFilter(
+                                    mContext.getResources().getColor(R.color.black));
+                        }
+                        statusIconId[position] = QuestionsActivity.PENDING_QUESTION;
+                        break;
+                    case QuestionsActivity.CORRECT_QUESTION:
+                        if(statusIconId[position] != QuestionsActivity.CORRECT_QUESTION){
+                            if(statusIconId[position] == QuestionsActivity.WRONG_QUESTION){
+                                questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_cancel_black_24dp);
+                                questionsAdapterViewHolder.mStatusIcon.setColorFilter(
+                                        ContextCompat.getColor(mContext, R.color.red));
+                            }
+                            animateImageAndSetIcon(
+                                    questionsAdapterViewHolder.mStatusIcon,
+                                    R.mipmap.ic_check_circle_black_24dp,
+                                    green);
+                        } else {
+                            questionsAdapterViewHolder.mStatusIcon.setImageResource(R.mipmap.ic_check_circle_black_24dp);
+                            questionsAdapterViewHolder.mStatusIcon.setColorFilter(
+                                    ContextCompat.getColor(mContext, R.color.green));
+                        }
+                        statusIconId[position] = QuestionsActivity.CORRECT_QUESTION;
+                        break;
+                    default:
+                        break;
+                }
 
         }
 
@@ -117,6 +165,33 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.Ques
         else
             questionsAdapterViewHolder.mQuestionSeparator.setVisibility(View.VISIBLE);
 
+    }
+
+    void animateImageAndSetIcon(final ImageView viewToAnimate, final int iconId , final int newColor){
+        int duration = 100;
+        viewToAnimate.animate().setDuration(duration).scaleX(0f).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                viewToAnimate.setImageResource(iconId);
+                viewToAnimate.setColorFilter(newColor);
+                viewToAnimate.animate().setDuration(100).scaleX(1f).start();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
     }
 
     public void setQuestionList (List<Question> questionList){

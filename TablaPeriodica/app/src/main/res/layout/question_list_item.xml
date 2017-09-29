@@ -31,7 +31,8 @@
             android:layout_height="36dp"
             android:src="@mipmap/ic_watch_later_black_24dp"
             android:id="@+id/question_status_icon"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:tint="@color/green"/>
 
         </FrameLayout>
 

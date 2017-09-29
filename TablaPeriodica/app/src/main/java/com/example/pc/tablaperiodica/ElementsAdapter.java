@@ -215,7 +215,7 @@ public class ElementsAdapter extends BaseAdapter{
         for(int i=0; i<ElementsData.tableIndex.length; i++){
             final View v = mGridView.getChildAt(i);
             if(getElementIndexFromPosition(i) > 0) {
-                v.animate().setDuration(100).scaleX(0.5f).setListener(new Animator.AnimatorListener() {
+                v.animate().setDuration(100).scaleX(0f).setListener(new Animator.AnimatorListener() {
                     @Override
                     public void onAnimationStart(Animator animation) {
 
