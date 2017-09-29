@@ -1,5 +1,6 @@
 package com.example.pc.tablaperiodica;
 
+import android.animation.Animator;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -15,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ProgressBar;
 
 import com.example.pc.tablaperiodica.data.QuestionsContract;
 import com.example.pc.tablaperiodica.data.QuestionsContract.AnswersEntry;
@@ -61,7 +63,7 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
 
-        mQuestionsAdapter = new QuestionsAdapter(this);
+        mQuestionsAdapter = new QuestionsAdapter(mContext, this);
         mRecyclerView.setAdapter(mQuestionsAdapter);
 
         mQuestionsList = new ArrayList<>();
@@ -86,11 +88,18 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                new writeAnswersTask(mElementsAdapter.getSelectedAnswersAsString()).execute((Void) null);
+                new writeAnswersTask(mElementsAdapter.getSelectedAnswersAsString()).execute((Void) null);
 
                 mQuestionsList.get(mQuestionNumber).userAnswers = mElementsAdapter.getSelectedAnswersAsArray();
 
-                Log.d("prueba", "guardando " + mElementsAdapter.getSelectedAnswersAsString());
+                int status = PENDING_QUESTION;
+                if(mElementsAdapter.correctlyAnswered()){
+                    status = CORRECT_QUESTION;
+                } else if(mElementsAdapter.selectedAnswers() > 0){
+                    status = WRONG_QUESTION;
+                }
+                mQuestionsList.get(mQuestionNumber).status = status;
+                mQuestionsAdapter.updateData(mQuestionsList);
                 mRecyclerView.setVisibility(View.VISIBLE);
                 mTableView.setVisibility(View.GONE);
             }
@@ -186,33 +195,55 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
     @Override
     public void onClick(int questionNumber) {
 
-//        mQuestionsAdapter.notifyDataSetChanged();
-
-//        Context context = QuestionsActivity.this;
-//        Class targetClass = TableActivity.class;
-//        Intent intent = new Intent(context, targetClass);
-//
-////        intent.putExtra(TableActivity.QUESTION_NUMBER_KEY, questionNumber);
-////        int[] answers = mQuestionsList.get(questionNumber).userAnswers;
-////        intent.putExtra(TableActivity.USER_ANSWERS_KEY, answers);
-//
-//
-//        startActivity(intent);
-
         mQuestionNumber = questionNumber;
         mUserAnswers = mQuestionsList.get(questionNumber).userAnswers;
         mCorrectAnswer = QuestionsData.getAnswer(questionNumber);
 
-        String caca = "";
-        for(int valor : mUserAnswers){
-            caca = caca + valor + "-";
-        }
-        Log.d("prueba", "seleccionadas " + caca);
-
         mElementsAdapter.setNewData(mUserAnswers, mCorrectAnswer, mTableView);
 
-        mRecyclerView.setVisibility(View.GONE);
-        mTableView.setVisibility(View.VISIBLE);
+        mRecyclerView.animate().setDuration(1000).alpha(0f).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mTableView.setVisibility(View.VISIBLE);
+                mTableView.animate().setDuration(0).alpha(0f).start();
+                mTableView.animate().setDuration(500).alpha(1f).setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+                mRecyclerView.setVisibility(View.GONE);
+                mRecyclerView.setAlpha(1f);
+
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
 
     }
 
@@ -298,6 +329,8 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
         @Override
         protected void onPostExecute(Void aVoid) {
             mQuestionsAdapter.updateData(mQuestionsList);
+            mQuestionsAdapter.notifyDataSetChanged();
+            mRecyclerView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -319,11 +352,11 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
             values.put(QuestionsContract.AnswersEntry.COLUMN_USER_ANSWERS, answersToWrite);
 
             int status = QuestionsActivity.PENDING_QUESTION;
-//            if(mElementsAdapter.correctlyAnswered()){
-//                status = QuestionsActivity.CORRECT_QUESTION;
-//            } else if(mElementsAdapter.selectedAnswers() > 0){
-//                status = QuestionsActivity.WRONG_QUESTION;
-//            }
+            if(mElementsAdapter.correctlyAnswered()){
+                status = QuestionsActivity.CORRECT_QUESTION;
+            } else if(mElementsAdapter.selectedAnswers() > 0){
+                status = QuestionsActivity.WRONG_QUESTION;
+            }
 
             values.put(QuestionsContract.AnswersEntry.COLUMN_ANSWERED, status);
 
@@ -345,7 +378,7 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            new ReadDatabase().execute((Void) null);
+//            new ReadDatabase().execute((Void) null);
         }
     }
 
