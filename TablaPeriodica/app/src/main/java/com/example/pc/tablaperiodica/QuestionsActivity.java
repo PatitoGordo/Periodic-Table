@@ -2,6 +2,7 @@ package com.example.pc.tablaperiodica;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -49,6 +50,8 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
         setContentView(R.layout.activity_questions);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.questions_recyclerview);
@@ -198,7 +201,6 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
 //
 //
 //        startActivity(intent);
-
         mQuestionNumber = questionNumber;
         mUserAnswers = mQuestionsList.get(questionNumber).userAnswers;
         mCorrectAnswer = QuestionsData.getAnswer(questionNumber);
@@ -213,7 +215,6 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
 
         mRecyclerView.setVisibility(View.GONE);
         mTableView.setVisibility(View.VISIBLE);
-
     }
 
     public class ReadDatabase extends AsyncTask<Void, Void, Void>{
