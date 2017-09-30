@@ -2,6 +2,10 @@ package com.example.pc.tablaperiodica;
 
 import android.animation.Animator;
 import android.content.Context;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +29,12 @@ public class ElementsAdapter extends BaseAdapter{
     private static int[] mCorrectAnswers;
     private static GridView mGridView;
     private static int mSelectedCount;
+    private static boolean mTableVisible = false;
+    private boolean playSound = true;
+
+    private static SoundPool sp;
+    private static int soundId;
+    private static MediaPlayer mPlayer;
 
     private static boolean[] selectedElements;
 
@@ -211,10 +221,16 @@ public class ElementsAdapter extends BaseAdapter{
         return mSelectedCount;
     }
 
+    public void notifyTableVisibility(boolean visible){
+        mTableVisible = visible;
+    }
+
     void playAnimation(){
+        playSound = true;
         for(int i=0; i<ElementsData.tableIndex.length; i++){
             final View v = mGridView.getChildAt(i);
             if(getElementIndexFromPosition(i) > 0) {
+
                 v.animate().setDuration(100).scaleX(0f).setListener(new Animator.AnimatorListener() {
                     @Override
                     public void onAnimationStart(Animator animation) {
@@ -224,6 +240,23 @@ public class ElementsAdapter extends BaseAdapter{
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         v.animate().setDuration(100).scaleX(1f).start();
+
+                        if(playSound){
+                            playSound = false;
+                            if(mTableVisible) {
+
+                                sp = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
+
+                                soundId = sp.load(mContext, R.raw.flipcard, 1);
+
+                                sp.play(soundId, 1, 1, 0, 0, 1);
+
+                                mPlayer = MediaPlayer.create(mContext, R.raw.success);
+
+                                mPlayer.start();
+                            }
+                        }
+
                     }
 
                     @Override
@@ -248,38 +281,22 @@ public class ElementsAdapter extends BaseAdapter{
         return false;
     }
 
-    public void animateView(final View v){
-
-        final int animDuration = 100;
-
-        v.animate().setDuration(animDuration).scaleX(0f)
-                .setListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        v.animate().setDuration(animDuration).scaleX(1f).start();
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animator animation) {
-
-                    }
-                });
-    }
-
     public void changeElementColor(final View v, final int backgroundColor, final int textColor){
         final View backgroundView = v.findViewById(R.id.background_view);
         final TextView numberTextView = (TextView) v.findViewById(R.id.tv_atomic_number);
         final TextView symbolTextview = (TextView) v.findViewById(R.id.tv_element_symbol);
+
+        if(mTableVisible) {
+            sp = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
+
+            soundId = sp.load(mContext, R.raw.flipcard, 1);
+
+            sp.play(soundId, 1, 1, 0, 0, 1);
+
+            mPlayer = MediaPlayer.create(mContext, R.raw.flipcard);
+
+            mPlayer.start();
+        }
 
 
         final int animDuration = 100;

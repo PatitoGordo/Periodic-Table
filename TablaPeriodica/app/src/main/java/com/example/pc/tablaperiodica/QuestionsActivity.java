@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,7 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.pc.tablaperiodica.data.QuestionsContract;
 import com.example.pc.tablaperiodica.data.QuestionsContract.AnswersEntry;
@@ -33,10 +34,10 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
     private Context mContext;
     private QuestionsDBHelper mDbHelper;
 
-
-
     private GridView mTableView;
     private ElementsAdapter mElementsAdapter;
+    private ConstraintLayout mTableLayout;
+    private TextView mQuestionTitle;
 
     private List<Question> mQuestionsList;
 
@@ -49,6 +50,9 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
     public static final int WRONG_QUESTION = -1;
     public static final int CORRECT_QUESTION = 1;
 
+    private boolean mTableVisible = false;
+    private boolean permissionToAnimate = false; //Variable extra para solucionar un bug desconocido
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,8 +64,7 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
 
         mContext = QuestionsActivity.this;
 
-        Button b = (Button) findViewById(R.id.button);
-
+        mTableLayout = (ConstraintLayout) findViewById(R.id.tableLayout);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -84,29 +87,12 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
 
         mElementsAdapter = new ElementsAdapter(mContext);
 
+        mQuestionTitle  = (TextView) findViewById(R.id.question_title);
+
         mTableView.setAdapter(mElementsAdapter);
 
         mDbHelper = new QuestionsDBHelper(mContext);
 
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new writeAnswersTask(mElementsAdapter.getSelectedAnswersAsString()).execute((Void) null);
-
-                mQuestionsList.get(mQuestionNumber).userAnswers = mElementsAdapter.getSelectedAnswersAsArray();
-
-                int status = PENDING_QUESTION;
-                if(mElementsAdapter.correctlyAnswered()){
-                    status = CORRECT_QUESTION;
-                } else if(mElementsAdapter.selectedAnswers() > 0){
-                    status = WRONG_QUESTION;
-                }
-                mQuestionsList.get(mQuestionNumber).status = status;
-                mQuestionsAdapter.updateData(mQuestionsList);
-                mRecyclerView.setVisibility(View.VISIBLE);
-                mTableView.setVisibility(View.GONE);
-            }
-        });
     }
 
     @Override
@@ -128,111 +114,56 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
         return super.onOptionsItemSelected(item);
     }
 
-    class resetAnswers extends AsyncTask<Void, Void, Void>{
+    @Override
+    public void onClick(int questionNumber) {
+        showTable(questionNumber);
 
-        @Override
-        protected Void doInBackground(Void... params) {
-
-            int[] question_status = new int[QuestionsData.QUESTION_COUNT];
-            mQuestionsList = new ArrayList<>();
-
-            SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
-            for(int i=0; i< QuestionsData.QUESTION_COUNT; i++){
-                ContentValues values = new ContentValues();
-                values.put(AnswersEntry.COLUMN_ANSWERED, PENDING_QUESTION);
-                values.put(AnswersEntry.COLUMN_USER_ANSWERS, "");
-
-                String selection = QuestionsContract.AnswersEntry._ID + " = ?";
-                String[] selectionArgs = {String.valueOf(i)};
-
-                db.update(
-                        QuestionsContract.AnswersEntry.QUESTION_TABLE_NAME,
-                        values,
-                        selection,
-                        selectionArgs
-                );
-            }
-
-            Cursor cursor = db.query(
-                    AnswersEntry.QUESTION_TABLE_NAME,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-            );
-
-            while(cursor.moveToNext()){
-                int id = cursor.getInt(
-                        cursor.getColumnIndex(AnswersEntry._ID)
-                );
-
-                int status = cursor.getInt(
-                        cursor.getColumnIndex(AnswersEntry.COLUMN_ANSWERED)
-                );
-
-                String answers = cursor.getString(
-                        cursor.getColumnIndex(AnswersEntry.COLUMN_USER_ANSWERS)
-                );
-
-                Question newQuestion = new Question(id, status, answers);
-
-                mQuestionsList.add(newQuestion);
-            }
-
-            cursor.close();
-            db.close();
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            mQuestionsAdapter.updateData(mQuestionsList);
-            super.onPostExecute(aVoid);
-        }
     }
 
     @Override
-    public void onClick(int questionNumber) {
+    public void onBackPressed() {
+        if(mTableVisible){
+            showQuestions();
+        }
+    }
+
+    void showTable(int questionNumber){
+        permissionToAnimate = true;
+
         mQuestionNumber = questionNumber;
+
+        mQuestionTitle.setText(QuestionsData.getQuestion(mQuestionNumber));
         mUserAnswers = mQuestionsList.get(questionNumber).userAnswers;
         mCorrectAnswer = QuestionsData.getAnswer(questionNumber);
 
+        mElementsAdapter.notifyTableVisibility(false);
+
         mElementsAdapter.setNewData(mUserAnswers, mCorrectAnswer, mTableView);
-        mRecyclerView.animate().setDuration(1000).alpha(0f).setListener(new Animator.AnimatorListener() {
+        float width = mRecyclerView.getWidth();
+        width *= 1.5;
+        mRecyclerView.animate().setDuration(600)
+                .setStartDelay(100).translationX(-width).setListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
+
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                mTableView.setVisibility(View.VISIBLE);
-                mTableView.animate().setDuration(0).alpha(0f).start();
-                mTableView.animate().setDuration(500).alpha(1f).setListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                    }
+                if(permissionToAnimate) {
+                    permissionToAnimate = false;
 
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                    }
+                    getSupportActionBar().hide();
 
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
+                    mTableLayout.setVisibility(View.VISIBLE);
+                    mTableLayout.setAlpha(0f);
+                    mTableLayout.animate().setDuration(600).alpha(1f).start();
+                    mRecyclerView.setVisibility(View.GONE);
+                    mRecyclerView.setAlpha(1f);
 
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animator animation) {
-
-                    }
-                });
-                mRecyclerView.setVisibility(View.GONE);
-                mRecyclerView.setAlpha(1f);
-
+                    mTableVisible = true;
+                    mElementsAdapter.notifyTableVisibility(mTableVisible);
+                }
             }
 
             @Override
@@ -245,7 +176,56 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
 
             }
         });
+    }
 
+    void showQuestions(){
+        permissionToAnimate = true;
+
+        new writeAnswersTask(mElementsAdapter.getSelectedAnswersAsString()).execute((Void) null);
+
+        mQuestionsList.get(mQuestionNumber).userAnswers = mElementsAdapter.getSelectedAnswersAsArray();
+
+        int status = PENDING_QUESTION;
+        if(mElementsAdapter.correctlyAnswered()){
+            status = CORRECT_QUESTION;
+        } else if(mElementsAdapter.selectedAnswers() > 0){
+            status = WRONG_QUESTION;
+        }
+        mQuestionsList.get(mQuestionNumber).status = status;
+        mQuestionsAdapter.updateData(mQuestionsList);
+
+        mElementsAdapter.notifyTableVisibility(mTableVisible);
+        mTableLayout.animate().setDuration(600).alpha(0f).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if(permissionToAnimate) {
+                    permissionToAnimate = false;
+                    getSupportActionBar().show();
+
+                    mTableVisible = false;
+
+                    mTableLayout.setVisibility(View.GONE);
+                    mRecyclerView.setVisibility(View.VISIBLE);
+
+                    mRecyclerView.animate().setDuration(600).translationX(0).start();
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
     }
 
     public class ReadDatabase extends AsyncTask<Void, Void, Void>{
@@ -285,7 +265,6 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
 
                     long newRowID = db.insert(AnswersEntry.QUESTION_TABLE_NAME, null, values);
                 }
-                db.close();
 
                 cursor = db.query(
                         AnswersEntry.QUESTION_TABLE_NAME,
@@ -380,6 +359,73 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
         @Override
         protected void onPostExecute(Void aVoid) {
 //            new ReadDatabase().execute((Void) null);
+        }
+    }
+
+    class resetAnswers extends AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            int[] question_status = new int[QuestionsData.QUESTION_COUNT];
+            mQuestionsList = new ArrayList<>();
+
+            SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+            for(int i=0; i< QuestionsData.QUESTION_COUNT; i++){
+                ContentValues values = new ContentValues();
+                values.put(AnswersEntry.COLUMN_ANSWERED, PENDING_QUESTION);
+                values.put(AnswersEntry.COLUMN_USER_ANSWERS, "");
+
+                String selection = QuestionsContract.AnswersEntry._ID + " = ?";
+                String[] selectionArgs = {String.valueOf(i)};
+
+                db.update(
+                        QuestionsContract.AnswersEntry.QUESTION_TABLE_NAME,
+                        values,
+                        selection,
+                        selectionArgs
+                );
+            }
+
+            Cursor cursor = db.query(
+                    AnswersEntry.QUESTION_TABLE_NAME,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+
+            while(cursor.moveToNext()){
+                int id = cursor.getInt(
+                        cursor.getColumnIndex(AnswersEntry._ID)
+                );
+
+                int status = cursor.getInt(
+                        cursor.getColumnIndex(AnswersEntry.COLUMN_ANSWERED)
+                );
+
+                String answers = cursor.getString(
+                        cursor.getColumnIndex(AnswersEntry.COLUMN_USER_ANSWERS)
+                );
+
+                Question newQuestion = new Question(id, status, answers);
+
+                mQuestionsList.add(newQuestion);
+            }
+
+            cursor.close();
+            db.close();
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            mQuestionsAdapter.updateData(mQuestionsList);
+            super.onPostExecute(aVoid);
         }
     }
 

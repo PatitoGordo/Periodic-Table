@@ -31,15 +31,15 @@
         android:singleLine="false"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:textColor="@color/elementColorDark"
-        android:textSize="17sp"
+        android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         tools:text="O" />
 
     <View
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
         android:id="@+id/background_view"
         android:background="@color/elementColor"
         tools:layout_editor_absoluteY="0dp"
