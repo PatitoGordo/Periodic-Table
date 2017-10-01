@@ -229,7 +229,7 @@ public class ElementsAdapter extends BaseAdapter{
         playSound = true;
         for(int i=0; i<ElementsData.tableIndex.length; i++){
             final View v = mGridView.getChildAt(i);
-            if(getElementIndexFromPosition(i) > 0) {
+            if(getElementIndexFromPosition(i) > 0 && v != null) {
 
                 v.animate().setDuration(100).scaleX(0f).setListener(new Animator.AnimatorListener() {
                     @Override
@@ -286,7 +286,6 @@ public class ElementsAdapter extends BaseAdapter{
         final TextView numberTextView = (TextView) v.findViewById(R.id.tv_atomic_number);
         final TextView symbolTextview = (TextView) v.findViewById(R.id.tv_element_symbol);
 
-        if(mTableVisible) {
             sp = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
 
             soundId = sp.load(mContext, R.raw.flipcard, 1);
@@ -296,7 +295,6 @@ public class ElementsAdapter extends BaseAdapter{
             mPlayer = MediaPlayer.create(mContext, R.raw.flipcard);
 
             mPlayer.start();
-        }
 
 
         final int animDuration = 100;

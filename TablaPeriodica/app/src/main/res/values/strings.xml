@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">TablaPeriodica</string>
-
+    <string name="choose_question">Selecciona una pregunta</string>
     <string name="clear_answers">Deseleccionar respuestas</string>
     <string name="send_answers">Enviar respuestas</string>
     <string name="reset_answers">Resetear preguntas</string>

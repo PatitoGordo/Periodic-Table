@@ -41,17 +41,16 @@
             app:layout_constraintTop_toTopOf="@id/tableLayout"
             android:layout_marginLeft="24dp"
             android:layout_marginRight="24dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="12dp"
             android:layout_marginBottom="32dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textSize="20sp"
-            android:background="@color/elementColor"
             />
 
         <GridView
             android:id="@+id/tableGridView"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:columnWidth="12dp"
             android:numColumns="18"
             android:gravity="bottom"
@@ -60,6 +59,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/question_title"
             android:layout_marginLeft="48dp"
             android:layout_marginRight="48dp"
             android:layout_marginTop="8dp"/>

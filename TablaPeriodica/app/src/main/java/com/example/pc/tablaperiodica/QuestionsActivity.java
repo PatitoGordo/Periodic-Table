@@ -64,6 +64,8 @@ public class QuestionsActivity extends AppCompatActivity implements QuestionsAda
 
         mContext = QuestionsActivity.this;
 
+        setTitle(mContext.getResources().getString(R.string.choose_question));
+
         mTableLayout = (ConstraintLayout) findViewById(R.id.tableLayout);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);

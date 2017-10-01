@@ -19,14 +19,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".TableActivity"
-            android:parentActivityName=".QuestionsActivity"
-            tools:targetApi="jelly_bean">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".QuestionsActivity"
-                />
-        </activity>
     </application>
 
 </manifest>
